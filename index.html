@@ -1,0 +1,110 @@
+<!doctype html>
+<html lang="te">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#145c45"><link rel="manifest" href="manifest.webmanifest">
+<title>Voice Khata v0.2</title>
+<style>
+:root{--g:#145c45;--mint:#e9f5ef;--bg:#f5f7f6;--ink:#17231e;--muted:#66756e;--line:#dce6e0}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font-family:system-ui,"Noto Sans Telugu",sans-serif}
+header{background:var(--g);color:white;padding:18px 16px}h1{margin:0;font-size:25px}header p{margin:5px 0 0;color:#d8eee4}
+main{max-width:900px;margin:16px auto;padding:0 13px 36px}.stats,.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(145px,1fr));gap:10px}
+.stat,.voicebox{background:var(--mint);padding:14px;border-radius:14px}.stat small{color:var(--muted)}.stat strong{display:block;font-size:23px}
+nav{display:flex;gap:8px;overflow:auto;margin:14px 0}button{border:0;border-radius:12px;padding:12px 14px;font:inherit;font-weight:650;background:#e6eee9;color:var(--g);cursor:pointer;white-space:nowrap}
+nav button.active,.primary,.mic{background:var(--g);color:white}.panel{display:none;background:white;border:1px solid var(--line);border-radius:18px;padding:16px;margin-bottom:14px}.panel.active{display:block}
+h2{font-size:20px;margin:0 0 12px}label{display:block;color:var(--muted);font-size:14px;margin:10px 0 5px}
+input,select{width:100%;padding:13px;border:1px solid var(--line);border-radius:11px;font:inherit;background:white}
+.row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}.row>*{flex:1}.mic{width:100%;font-size:18px;padding:16px}
+.hint,.status{font-size:13px;line-height:1.55;color:var(--muted)}.status{color:var(--g);margin-top:8px}
+.voicebox{border:1px dashed #8eb6a0;margin:10px 0}.preview{border:1px solid var(--line);padding:12px;border-radius:12px;margin-top:12px;background:#fbfdfc}
+table{width:100%;border-collapse:collapse;margin-top:12px;font-size:14px}td,th{text-align:left;padding:9px 5px;border-bottom:1px solid var(--line)}th{color:var(--muted)}
+.balance{font-weight:750;color:var(--g)}footer{text-align:center;color:var(--muted);font-size:12px;padding:14px}
+@media(max-width:520px){table{font-size:12px}td,th{padding:7px 3px}}
+</style></head>
+<body>
+<header><h1>🎙️ Voice Khata</h1><p>కిరాణా షాపుల కోసం డిజిటల్ ఖాతా • Voice First v0.2</p></header>
+<main>
+<div class="stats">
+ <div class="stat"><small>మొత్తం కస్టమర్లు</small><strong id="customerCount">0</strong></div>
+ <div class="stat"><small>మొత్తం రావాల్సిన బాకీ</small><strong id="totalDue">₹0</strong></div>
+ <div class="stat"><small>పని విధానం</small><strong>Local demo</strong></div>
+</div>
+<nav>
+<button class="active" data-tab="entry">🎙️ Voice ఖాతా</button><button data-tab="products">📦 వస్తువులు</button><button data-tab="customers">👥 కస్టమర్లు</button><button data-tab="history">📒 History</button>
+</nav>
+<section class="panel active" id="entry">
+<h2>మాట్లాడి ఖాతా నమోదు చేయండి</h2>
+<div class="voicebox">
+ <button class="mic" id="micBtn">🎙️ మాట్లాడండి</button>
+ <div class="status" id="voiceStatus">ఉదాహరణ: “రమేష్ రెండు కిలోల బియ్యం అప్పు” లేదా “రమేష్ నలభై రూపాయలు ఇచ్చాడు”</div>
+ <label for="voiceText">గుర్తించిన మాటలు (అవసరమైతే సరిచేయండి)</label><input id="voiceText" placeholder="మైక్‌లో మాట్లాడండి లేదా ఇక్కడ టైప్ చేయండి">
+ <button class="primary" id="processVoice" style="margin-top:10px;width:100%">మాటలను అర్థం చేసుకోండి</button>
+ <p class="hint">గమనిక: Telugu voice recognition Chrome/device/language support మరియు internet మీద ఆధారపడవచ్చు. Offline voice ఇంకా హామీ కాదు. Typed entry కూడా అందుబాటులో ఉంది.</p>
+</div>
+<div class="preview" id="preview" hidden>
+ <b>సేవ్ చేసే ముందు వివరాలు చూడండి</b><div id="previewText" style="margin:8px 0"></div>
+ <div class="row"><button class="primary" id="confirmSave">అవును, సేవ్ చేయి</button><button id="editAgain">మార్చాలి</button></div>
+</div>
+<h2 style="margin-top:18px">Manual entry</h2>
+<div class="grid">
+ <div><label>Customer</label><input id="entryCustomer" placeholder="రమేష్"></div>
+ <div><label>రకం</label><select id="entryType"><option value="debt">అప్పు / కొనుగోలు</option><option value="payment">చెల్లింపు</option></select></div>
+ <div><label>Product</label><select id="entryProduct"><option value="">వస్తువు ఎంచుకోండి</option></select></div>
+ <div><label>Quantity</label><input id="entryQty" type="number" min=".01" step=".01" placeholder="2"></div>
+ <div><label>Payment amount (₹)</label><input id="paymentAmount" type="number" min=".01" step=".01" placeholder="40"></div>
+</div>
+<div class="row" style="margin-top:12px"><div class="stat"><small>మొత్తం</small><strong id="lineTotal">₹0</strong></div><button class="primary" id="manualPreview">వివరాలు చూడండి</button></div>
+</section>
+<section class="panel" id="products"><h2>వస్తువులు & ధరలు</h2>
+<div class="grid"><div><label>వస్తువు పేరు</label><input id="productName" placeholder="బియ్యం"></div><div><label>Unit</label><select id="productUnit"><option>కిలో</option><option>గ్రాము</option><option>లీటర్</option><option>ప్యాకెట్</option><option>సంఖ్య</option><option>డజన్</option></select></div><div><label>ఒక Unit ధర (₹)</label><input id="productPrice" type="number" min="0" step=".01" placeholder="50"></div></div>
+<button class="primary" id="addProduct" style="margin-top:12px">వస్తువు సేవ్ చేయి</button><div id="productList"></div></section>
+<section class="panel" id="customers"><h2>కస్టమర్లు</h2><div class="row"><input id="customerName" placeholder="కొత్త కస్టమర్ పేరు"><button class="primary" id="addCustomer">జోడించు</button></div><div id="customerList"></div></section>
+<section class="panel" id="history"><h2>ఖాతా వివరాలు</h2><label>కస్టమర్</label><select id="historyCustomer"><option value="">అందరి లావాదేవీలు</option></select><div id="historyList"></div></section>
+<footer>v0.2 demo • డేటా ఈ browser/device లోనే ఉంటుంది. Browser data clear చేస్తే పోవచ్చు. Backup/cloud sync ఇంకా లేదు.</footer>
+</main>
+<script>
+const $=id=>document.getElementById(id), read=(k,d)=>{try{return JSON.parse(localStorage.getItem('vk_'+k))??d}catch{return d}}, write=(k,v)=>localStorage.setItem('vk_'+k,JSON.stringify(v));
+let products=read('products',[]),customers=read('customers',[]),tx=read('tx',[]),pending=null;
+const money=n=>'₹'+Number(n||0).toLocaleString('en-IN',{maximumFractionDigits:2});
+function balance(n){return tx.filter(t=>t.customer===n).reduce((s,t)=>s+(t.type==='debt'?t.amount:-t.amount),0)}
+function persist(){write('products',products);write('customers',customers);write('tx',tx);render()}
+function esc(s){return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
+function render(){
+ $('customerCount').textContent=customers.length;$('totalDue').textContent=money(tx.reduce((s,t)=>s+(t.type==='debt'?t.amount:-t.amount),0));
+ $('productList').innerHTML=products.length?'<table><tr><th>వస్తువు</th><th>Unit</th><th>ధర</th><th></th></tr>'+products.map((p,i)=>`<tr><td>${esc(p.name)}</td><td>${esc(p.unit)}</td><td>${money(p.price)}</td><td><button onclick="removeProduct(${i})">తొలగించు</button></td></tr>`).join('')+'</table>':'<p>వస్తువులు లేవు</p>';
+ $('customerList').innerHTML=customers.length?'<table><tr><th>కస్టమర్</th><th>బాకీ</th></tr>'+customers.map(c=>`<tr><td>${esc(c)}</td><td class="balance">${money(balance(c))}</td></tr>`).join('')+'</table>':'<p>కస్టమర్లు లేరు</p>';
+ $('entryProduct').innerHTML='<option value="">వస్తువు ఎంచుకోండి</option>'+products.map((p,i)=>`<option value="${i}">${esc(p.name)} — ${money(p.price)}/${esc(p.unit)}</option>`).join('');
+ $('historyCustomer').innerHTML='<option value="">అందరి లావాదేవీలు</option>'+customers.map(c=>`<option>${esc(c)}</option>`).join('');renderHistory();updateTotal();
+}
+function renderHistory(){let c=$('historyCustomer').value,rows=tx.filter(t=>!c||t.customer===c).slice().reverse();$('historyList').innerHTML=rows.length?'<table><tr><th>తేదీ</th><th>కస్టమర్</th><th>వివరం</th><th>మొత్తం</th><th>రకం</th></tr>'+rows.map(t=>`<tr><td>${new Date(t.date).toLocaleDateString('en-IN')}</td><td>${esc(t.customer)}</td><td>${esc(t.note)}</td><td>${money(t.amount)}</td><td>${t.type==='debt'?'అప్పు':'చెల్లింపు'}</td></tr>`).join('')+'</table>':'<p>లావాదేవీలు లేవు</p>'}
+function updateTotal(){let p=products[Number($('entryProduct').value)],q=Number($('entryQty').value)||0;$('lineTotal').textContent=$('entryType').value==='payment'?money($('paymentAmount').value):p?money(p.price*q):'₹0'}
+document.querySelectorAll('nav button').forEach(b=>b.onclick=()=>{document.querySelectorAll('nav button').forEach(x=>x.classList.remove('active'));document.querySelectorAll('.panel').forEach(x=>x.classList.remove('active'));b.classList.add('active');$(b.dataset.tab).classList.add('active')});
+$('addProduct').onclick=()=>{let n=$('productName').value.trim(),p=Number($('productPrice').value);if(!n||!Number.isFinite(p)||p<0)return alert('పేరు, సరైన ధర ఇవ్వండి');products.push({name:n,unit:$('productUnit').value,price:p});$('productName').value='';$('productPrice').value='';persist()};
+window.removeProduct=i=>{if(confirm('వస్తువును తొలగించాలా?')){products.splice(i,1);persist()}};
+$('addCustomer').onclick=()=>{let n=$('customerName').value.trim();if(!n)return;if(!customers.includes(n))customers.push(n);$('customerName').value='';persist()};
+['entryProduct','entryQty','entryType','paymentAmount'].forEach(id=>$(id).addEventListener('input',updateTotal));$('historyCustomer').onchange=renderHistory;
+function showPreview(item){pending=item;$('preview').hidden=false;$('previewText').innerHTML=`Customer: <b>${esc(item.customer)}</b><br>రకం: <b>${item.type==='debt'?'అప్పు':'చెల్లింపు'}</b><br>వివరం: ${esc(item.note)}<br>మొత్తం: <b>${money(item.amount)}</b><br>కొత్త బాకీ: <b>${money(balance(item.customer)+(item.type==='debt'?item.amount:-item.amount))}</b>`;$('preview').scrollIntoView({behavior:'smooth',block:'center'})}
+function savePending(){if(!pending)return;let x=pending;if(x.type==='payment'&&x.amount>balance(x.customer)){if(!confirm('ఈ payment ప్రస్తుత బాకీ కంటే ఎక్కువగా ఉంది. అయినా నమోదు చేయాలా?'))return}if(!customers.includes(x.customer))customers.push(x.customer);tx.push({...x,date:new Date().toISOString()});pending=null;$('preview').hidden=true;persist();alert('ఖాతాలో నమోదు అయింది');}
+$('confirmSave').onclick=savePending;$('editAgain').onclick=()=>{$('preview').hidden=true;pending=null};
+$('manualPreview').onclick=()=>{let c=$('entryCustomer').value.trim(),type=$('entryType').value,p=products[Number($('entryProduct').value)],q=Number($('entryQty').value),amt=Number($('paymentAmount').value);if(!c)return alert('Customer పేరు ఇవ్వండి');if(type==='payment'){if(!amt||amt<=0)return alert('Payment amount ఇవ్వండి');showPreview({customer:c,type,note:'Payment received',amount:amt})}else{if(!p||!q||q<=0)return alert('Product, quantity ఎంచుకోండి');showPreview({customer:c,type,note:`${p.name} × ${q} ${p.unit}`,amount:Math.round(p.price*q*100)/100})}};
+const nums={'ఒకటి':1,'ఒక':1,'ఒక్క':1,'రెండు':2,'మూడు':3,'నాలుగు':4,'ఐదు':5,'ఆరు':6,'ఏడు':7,'ఎనిమిది':8,'తొమ్మిది':9,'పది':10,'పదకొండు':11,'పన్నెండు':12,'ఇరవై':20,'ముప్పై':30,'నలభై':40,'యాభై':50,'అరవై':60,'డెబ్బై':70,'ఎనభై':80,'తొంభై':90,'వంద':100};
+function findNumber(s){let m=s.match(/\d+(?:\.\d+)?/);if(m)return Number(m[0]);for(const [w,n] of Object.entries(nums))if(s.includes(w))return n;return 0}
+function parseCommand(s){
+ let low=s.toLowerCase(),customer=customers.find(c=>low.includes(c.toLowerCase()));
+ const customerAliases={'Ramesh':['రమేష్','రమేశ్'],'Ramu':['రాము']};
+ if(!customer)customer=customers.find(c=>(customerAliases[c]||[]).some(a=>s.includes(a)));
+ if(!customer)customer=customers.find(c=>s.includes(c));
+ if(!customer)return {error:'Customer పేరు గుర్తించలేదు. ముందుగా customer add చేయండి లేదా మాటలను సరిచేయండి.'};
+ const isPayment=/ఇచ్చా|ఇచ్చాడు|చెల్లించ|కట్టా|పేమెంట్|payment|paid/i.test(s);
+ if(isPayment){let amount=findNumber(s);if(!amount)return {error:'Payment amount గుర్తించలేదు. ఉదా: “రమేష్ 40 రూపాయలు ఇచ్చాడు”'};return {customer,type:'payment',note:'Payment received',amount}}
+ const productAliases={'Rice':['బియ్యం','బియ్యము']};
+ const product=products.find(p=>s.toLowerCase().includes(p.name.toLowerCase())||s.includes(p.name)||(productAliases[p.name]||[]).some(a=>s.includes(a)));
+ if(!product)return {error:'Product పేరు గుర్తించలేదు. Product list లో ఉన్న పేరుతో చెప్పండి.'};
+ let qty=findNumber(s);if(!qty)return {error:'Quantity గుర్తించలేదు. ఉదా: “రమేష్ 2 కిలో బియ్యం అప్పు”'};
+ return {customer,type:'debt',note:`${product.name} × ${qty} ${product.unit}`,amount:Math.round(product.price*qty*100)/100};
+}
+$('processVoice').onclick=()=>{let s=$('voiceText').value.trim();if(!s)return alert('మాట్లాడండి లేదా type చేయండి');let item=parseCommand(s);if(item.error){$('voiceStatus').textContent=item.error;return alert(item.error)}showPreview(item);$('voiceStatus').textContent='వివరాలు సిద్ధంగా ఉన్నాయి. Save చేసే ముందు సరిచూడండి.'};
+$('micBtn').onclick=()=>{const SR=window.SpeechRecognition||window.webkitSpeechRecognition;if(!SR){$('voiceStatus').textContent='ఈ Chrome/device లో voice recognition అందుబాటులో లేదు. Text box లో type చేసి కొనసాగించండి.';return}let r=new SR();r.lang='te-IN';r.interimResults=false;r.maxAlternatives=1;r.onstart=()=>$('voiceStatus').textContent='వింటున్నాను… మాట్లాడండి';r.onerror=e=>$('voiceStatus').textContent='Voice error: '+e.error+' • Text box ఉపయోగించండి';r.onresult=e=>{$('voiceText').value=e.results[0][0].transcript;$('voiceStatus').textContent='గుర్తించిన మాటలు వచ్చాయి. ఇప్పుడు “మాటలను అర్థం చేసుకోండి” నొక్కండి.'};r.start()};
+render();
+if('serviceWorker'in navigator&&location.protocol.startsWith('http'))window.addEventListener('load',()=>navigator.serviceWorker.register('./sw.js').catch(()=>{}));
+</script></body></html>
