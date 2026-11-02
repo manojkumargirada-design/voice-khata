@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <meta name="theme-color" content="#145c45"><link rel="manifest" href="manifest.webmanifest">
-<title>Voice Khata v0.3</title>
+<title>Voice Khata v0.4</title>
 <style>
 :root{--g:#145c45;--mint:#e9f5ef;--bg:#f5f7f6;--ink:#17231e;--muted:#66756e;--line:#dce6e0}
 *{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font-family:system-ui,"Noto Sans Telugu",sans-serif}
@@ -22,7 +22,7 @@ table{width:100%;border-collapse:collapse;margin-top:12px;font-size:14px}td,th{t
 @media(max-width:520px){table{font-size:12px}td,th{padding:7px 3px}}
 </style></head>
 <body>
-<header><h1>🎙️ Voice Khata</h1><p>కిరాణా షాపుల కోసం డిజిటల్ ఖాతా • Voice First v0.3</p></header>
+<header><h1>🎙️ Voice Khata</h1><p>కిరాణా షాపుల కోసం డిజిటల్ ఖాతా • Voice First v0.4</p></header>
 <main>
 <div class="stats">
  <div class="stat"><small>మొత్తం కస్టమర్లు</small><strong id="customerCount">0</strong></div>
@@ -30,7 +30,7 @@ table{width:100%;border-collapse:collapse;margin-top:12px;font-size:14px}td,th{t
  <div class="stat"><small>పని విధానం</small><strong>Local demo</strong></div>
 </div>
 <nav>
-<button class="active" data-tab="entry">🎙️ Voice ఖాతా</button><button data-tab="products">📦 వస్తువులు</button><button data-tab="customers">👥 కస్టమర్లు</button><button data-tab="history">📒 History</button>
+<button class="active" data-tab="entry">🎙️ Voice ఖాతా</button><button data-tab="products">📦 వస్తువులు</button><button data-tab="customers">👥 కస్టమర్లు</button><button data-tab="history">📒 History</button><button data-tab="backup">🛡️ Backup</button>
 </nav>
 <section class="panel active" id="entry">
 <h2>మాట్లాడి ఖాతా నమోదు చేయండి</h2>
@@ -60,7 +60,12 @@ table{width:100%;border-collapse:collapse;margin-top:12px;font-size:14px}td,th{t
 <button class="primary" id="addProduct" style="margin-top:12px">వస్తువు సేవ్ చేయి</button><div id="productList"></div></section>
 <section class="panel" id="customers"><h2>కస్టమర్లు</h2><div class="row"><input id="customerName" placeholder="కొత్త కస్టమర్ పేరు"><button class="primary" id="addCustomer">జోడించు</button></div><div id="customerList"></div></section>
 <section class="panel" id="history"><h2>ఖాతా వివరాలు</h2><label>కస్టమర్</label><select id="historyCustomer"><option value="">అందరి లావాదేవీలు</option></select><div id="historyList"></div></section>
-<footer>v0.3 demo • డేటా ఈ browser/device లోనే ఉంటుంది. Browser data clear చేస్తే పోవచ్చు. Backup/cloud sync ఇంకా లేదు.</footer>
+<section class="panel" id="backup"><h2>🛡️ Backup & Restore</h2>
+<p>మీ Products, Customers, History ను JSON backup file గా download చేసుకోవచ్చు. Restore చేస్తే ఈ browser లో ఉన్న data backup data తో replace అవుతుంది.</p>
+<button class="primary" id="downloadBackup">⬇️ Backup Download</button>
+<label for="backupFile">Backup file ఎంచుకోండి (.json)</label><input id="backupFile" type="file" accept="application/json,.json">
+<button id="restoreBackup" style="margin-top:10px">♻️ Restore Backup</button><p class="hint">Backup file ను safe గా ఉంచండి. Restore ముందు confirmation వస్తుంది. ఇది cloud backup కాదు.</p></section>
+<footer>v0.4 demo • డేటా ఈ browser/device లోనే ఉంటుంది. Browser data clear చేస్తే పోవచ్చు. Backup file మీ దగ్గర safe గా ఉంచండి.</footer>
 </main>
 <script>
 const $=id=>document.getElementById(id), read=(k,d)=>{try{return JSON.parse(localStorage.getItem('vk_'+k))??d}catch{return d}}, write=(k,v)=>localStorage.setItem('vk_'+k,JSON.stringify(v));
@@ -86,6 +91,8 @@ $('addCustomer').onclick=()=>{let n=$('customerName').value.trim();if(!n)return;
 function showPreview(item){pending=item;$('preview').hidden=false;const breakdown=item.type==='debt'&&item.unitPrice!=null?`<br>ధర: <b>${money(item.unitPrice)} / ${esc(item.unit)}</b><br>లెక్క: <b>${esc(String(item.quantity))} × ${money(item.unitPrice)} = ${money(item.amount)}</b>`:'';$('previewText').innerHTML=`Customer: <b>${esc(item.customer)}</b><br>రకం: <b>${item.type==='debt'?'అప్పు':'చెల్లింపు'}</b><br>వివరం: ${esc(item.note)}${breakdown}<br>మొత్తం: <b>${money(item.amount)}</b><br>కొత్త బాకీ: <b>${money(balance(item.customer)+(item.type==='debt'?item.amount:-item.amount))}</b>`;$('preview').scrollIntoView({behavior:'smooth',block:'center'});speakTotal(item)}
 function speakTotal(item){if(!('speechSynthesis'in window)||!('SpeechSynthesisUtterance'in window))return;try{speechSynthesis.cancel();const words=item.type==='debt'?`మొత్తం ${item.amount} రూపాయలు`:`${item.amount} రూపాయలు చెల్లింపు`;const u=new SpeechSynthesisUtterance(words);u.lang='te-IN';u.rate=0.9;speechSynthesis.speak(u)}catch(e){/* visual preview remains available */}}
 function savePending(){if(!pending)return;let x=pending;if(x.type==='payment'&&x.amount>balance(x.customer)){if(!confirm('ఈ payment ప్రస్తుత బాకీ కంటే ఎక్కువగా ఉంది. అయినా నమోదు చేయాలా?'))return}if(!customers.includes(x.customer))customers.push(x.customer);tx.push({...x,date:new Date().toISOString()});pending=null;$('preview').hidden=true;persist();alert('ఖాతాలో నమోదు అయింది');}
+$('downloadBackup').onclick=()=>{const data={app:'Voice Khata',version:'0.4',createdAt:new Date().toISOString(),products,customers,tx};const blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'});const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download='voice-khata-backup-'+new Date().toISOString().slice(0,10)+'.json';a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);alert('Backup download ప్రారంభమైంది. Downloads folder లో file ఉందో చూడండి.')};
+$('restoreBackup').onclick=async()=>{const f=$('backupFile').files[0];if(!f)return alert('ముందుగా backup JSON file ఎంచుకోండి');if(!confirm('Restore చేస్తే ప్రస్తుతం ఉన్న Products, Customers, History replace అవుతాయి. Continue చేయాలా?'))return;try{const b=JSON.parse(await f.text());if(!Array.isArray(b.products)||!Array.isArray(b.customers)||!Array.isArray(b.tx))throw Error('Invalid backup');products=b.products;customers=b.customers;tx=b.tx;persist();alert('Backup restore అయింది!')}catch(e){alert('Backup file సరైనది కాదు. పాత data మార్చలేదు.')}};
 $('confirmSave').onclick=savePending;$('editAgain').onclick=()=>{$('preview').hidden=true;pending=null};
 $('manualPreview').onclick=()=>{let c=$('entryCustomer').value.trim(),type=$('entryType').value,p=products[Number($('entryProduct').value)],q=Number($('entryQty').value),amt=Number($('paymentAmount').value);if(!c)return alert('Customer పేరు ఇవ్వండి');if(type==='payment'){if(!amt||amt<=0)return alert('Payment amount ఇవ్వండి');showPreview({customer:c,type,note:'Payment received',amount:amt})}else{if(!p||!q||q<=0)return alert('Product, quantity ఎంచుకోండి');showPreview({customer:c,type,note:`${p.name} × ${q} ${p.unit} @ ${money(p.price)}/${p.unit}`,quantity:q,unit:p.unit,unitPrice:p.price,amount:Math.round(p.price*q*100)/100})}};
 const nums={'ఒకటి':1,'ఒక':1,'ఒక్క':1,'రెండు':2,'మూడు':3,'నాలుగు':4,'ఐదు':5,'ఆరు':6,'ఏడు':7,'ఎనిమిది':8,'తొమ్మిది':9,'పది':10,'పదకొండు':11,'పన్నెండు':12,'ఇరవై':20,'ముప్పై':30,'నలభై':40,'యాభై':50,'అరవై':60,'డెబ్బై':70,'ఎనభై':80,'తొంభై':90,'వంద':100};

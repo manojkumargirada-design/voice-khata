@@ -1,20 +1,6 @@
-Voice Khata v0.3 — Telugu-first demo
+Voice Khata v0.4
 
-Files to upload to GitHub repository root:
-- index.html
-- manifest.webmanifest
-- sw.js
+కొత్తది: Backup Download + Restore.
+Backup button నొక్కితే JSON file Downloads లో వస్తుంది. ఆ file ను safe గా ఉంచండి (Google Driveలో కూడా copy చేయవచ్చు). Restore చేయడానికి JSON file select చేసి Restore Backup నొక్కండి. Restore current browser data ను replace చేస్తుంది; confirmation చదివి మాత్రమే కొనసాగించండి.
 
-Changes in v0.3:
-- Debt preview shows unit price and calculation (quantity × rate = total).
-- Debt history detail includes the unit rate.
-- After preparing a preview, browser Telugu text-to-speech attempts to speak the total.
-- Existing localStorage keys remain unchanged: vk_products, vk_customers, vk_tx.
-
-Important:
-- This is still a prototype, not production accounting software.
-- Browser text-to-speech availability/voice depends on the Android device and installed voices.
-- Speech recognition may require internet; offline Telugu microphone recognition is not guaranteed.
-- Data remains in this browser's localStorage. Clearing site data can erase it.
-- No cloud sync, login, encrypted backup, or multi-shop security yet.
-- Test with sample data only; do not rely on it for real shop accounts.
+పాత data keys vk_products, vk_customers, vk_tx కొనసాగుతాయి. Same GitHub Pages URL/browser profile లో update చేస్తే existing data అలాగే ఉండాలి. Site data clear చేయకండి.
